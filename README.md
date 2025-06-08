@@ -8,27 +8,27 @@ HBnB Evolution is a backend application that models the behavior of a rental pla
 
 ## 🌟 Objectives
 
-Design and document a layered architecture for the HBnB platform
+- Design and document a layered architecture for the HBnB platform
 
-Define the core business logic using UML Class Diagrams
+- Define the core business logic using UML Class Diagrams
 
-Map system interactions using Sequence and Package Diagrams
+- Map system interactions using Sequence and Package Diagrams
 
-Provide technical blueprints that support implementation and development
+- Provide technical blueprints that support implementation and development
 
 ## 🏗️ Architecture
 
 The HBnB application follows a 3-layer architecture:
 
-#### Presentation Layer (UI & API)
+#### - Presentation Layer (UI & API)
 
 Handles HTTP requests/responses and routes user actions
 
-#### Business Logic Layer
+#### - Business Logic Layer
 
 Encapsulates core rules, validations, and system behavior
 
-#### Persistence Layer
+#### - Persistence Layer
 
 Manages data access and communication with the database
 
