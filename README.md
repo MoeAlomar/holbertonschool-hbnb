@@ -20,15 +20,15 @@ HBnB Evolution is a backend application that models the behavior of a rental pla
 
 The HBnB application follows a 3-layer architecture:
 
-#### - Presentation Layer (UI & API)
+- #### Presentation Layer (UI & API)
 
 Handles HTTP requests/responses and routes user actions
 
-#### - Business Logic Layer
+- #### Business Logic Layer
 
 Encapsulates core rules, validations, and system behavior
 
-#### - Persistence Layer
+- #### Persistence Layer
 
 Manages data access and communication with the database
 
