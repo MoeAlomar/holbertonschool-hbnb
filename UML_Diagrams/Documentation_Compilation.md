@@ -20,7 +20,7 @@ The HBnB application is structured using a three-layer architecture, designed to
 
 ## 📊 Package Diagram
 
-Below is the high-level package diagram created using Mermaid.js, showcasing the three layers, their key components, and their dependencies:
+Below is the high-level package diagram, showcasing the three layers, their key components, and their dependencies:
 
 ![IMG_20250604_130944_008(1)](https://github.com/user-attachments/assets/8a2b7574-bb6c-4a8a-81f4-482a1f3f2270)
 
@@ -96,7 +96,7 @@ The Business Logic Layer forms the heart of the HBnB application, encapsulating 
 
 ## 📊 Class Diagram
 
-Below is the detailed class diagram for the Business Logic Layer, created using Mermaid.js. It showcases the entities, their properties, operations, and how they relate to one another:
+Below is the detailed class diagram for the Business Logic Layer, It showcases the entities, their properties, operations, and how they relate to one another:
 
 ![Class_Diagram](https://github.com/user-attachments/assets/f0c9111f-07b6-4523-901c-24d5ca6f00b3)
 
@@ -151,6 +151,30 @@ This class diagram serves as a blueprint for the Business Logic Layer, ensuring 
 
 ---
 
-API Interaction Flow
+## API Interaction Flow
 
-To be completed with the Sequence Diagrams for API calls and explanatory notes.
+This section presents the flow of four key API calls in the HBnB application: User Registration, Place Creation, Review Submission, and Fetching a List of Places. illustrating the step-by-step interactions between the Presentation Layer, Business Logic Layer, and Persistence Layer, providing a clear visualization of how the system processes each request. 
+
+## 📊 Sequence Diagrams for API Calls
+Below is the detailed sequence diagrams for the API calls, showing the flow of each request from one layer to another
+
+### 1. User Registration (POST /users)
+
+![User_Register_API](https://github.com/user-attachments/assets/56ebd1d4-6b67-43b3-8cba-47760c6c91c0)
+
+### Explanatory Notes
+
+Description: This diagram depicts the process of registering a new user via the POST /users endpoint. It covers the submission of user details, validation, and storage in the database.
+
+#### Key Steps:
+
+- The actor submits registration data through the User Interface, which sends a POST request to the API Services.
+- The Presentation Facade forwards the request to the UserService, where a UserModel object is created and validated (e.g., checking email format).
+- The Persistence Facade checks email uniqueness via the UserRepository and DBMS Connection.
+- If the email is taken, a 400 Bad Request response is returned; otherwise, the user is saved, and a 201 Created response is sent with the new User ID.
+
+#### Layer Contributions:
+
+- Presentation Layer: Handles the HTTP request and response.
+- Business Logic Layer: Validates user data and constructs the User object.
+- Persistence Layer: Ensures email uniqueness and stores the user in the database.
