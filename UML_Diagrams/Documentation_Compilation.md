@@ -158,11 +158,11 @@ This section presents the flow of four key API calls in the HBnB application: Us
 ## 📊 Sequence Diagrams for API Calls
 Below is the detailed sequence diagrams for the API calls, showing the flow of each request from one layer to another
 
-### 1. User Registration (POST /users)
+### 1. User Registration (POST /users):
 
 ![User_Register_API](https://github.com/user-attachments/assets/56ebd1d4-6b67-43b3-8cba-47760c6c91c0)
 
-### Explanatory Notes
+## 📝 Explanatory Notes
 
 Description: This diagram depicts the process of registering a new user via the POST /users endpoint. It covers the submission of user details, validation, and storage in the database.
 
@@ -178,3 +178,80 @@ Description: This diagram depicts the process of registering a new user via the 
 - Presentation Layer: Handles the HTTP request and response.
 - Business Logic Layer: Validates user data and constructs the User object.
 - Persistence Layer: Ensures email uniqueness and stores the user in the database.
+
+
+### 2. Place Creation (POST /places)
+
+![create_Place_API](https://github.com/user-attachments/assets/2b6d7f19-f47c-475e-9c36-b99e3e2663a2)
+
+
+## 📝 Explanatory Notes
+
+Description: This diagram illustrates the creation of a new place listing via the POST /places endpoint, including validation of the price and owner.
+
+#### Key Steps:
+
+- The actor submits place data through the User Interface, triggering a POST request to the API Services.
+- The Presentation Facade routes the request to the PlaceService, which creates a PlaceModel object, sets the owner (authenticated user), and validates the data (e.g., price > 0).
+- The Persistence Facade verifies the owner’s existence via the PlaceRepository and DBMS Connection.
+- If validation fails (e.g., invalid price or owner not found), a 400 Bad Request is returned; otherwise, the place is saved, and a 201 Created response is sent with the Place ID.
+
+#### Layer Contributions:
+
+- Presentation Layer: Manages the request and response.
+- Business Logic Layer: Validates place data and assigns the owner.
+- Persistence Layer: Confirms owner existence and stores the place.
+
+
+
+### 3. Review Submission (POST /reviews)
+
+
+![review_Submission_API](https://github.com/user-attachments/assets/e914f993-14df-4fb5-9ebf-2fa637223e68)
+
+
+## 📝 Explanatory Notes
+
+Description: This diagram shows the submission of a review for a place via the POST /reviews endpoint, ensuring user and place validity.
+
+#### Key Steps:
+
+- The actor submits review data through the User Interface, sending a POST request to the API Services.
+- The Presentation Facade forwards the request to the ReviewService, which creates a ReviewModel object, sets the user and place, and validates the rating (e.g., 1-5).
+- The Persistence Facade checks the existence of the user and place via the ReviewRepository and DBMS Connection.
+- If validation fails (e.g., invalid rating or missing entities), a 400 Bad Request is returned; otherwise, the review is saved, and a 201 Created response is sent with the Review ID.
+
+#### Layer Contributions:
+
+- Presentation Layer: Processes the request and response.
+- Business Logic Layer: Validates review data and links it to user and place entities.
+- Persistence Layer: Verifies entity existence and stores the review.
+
+
+
+4. Fetching a List of Places (GET /places)
+
+
+![fetch_Places_API](https://github.com/user-attachments/assets/e9cdaf06-398d-4dc0-b6e1-6fa86a80534c)
+
+
+## 📝 Explanatory Notes
+
+Description: This diagram illustrates the retrieval of a list of places via the GET /places endpoint, supporting optional filtering criteria.
+
+#### Key Steps:
+
+- The actor requests a place list through the User Interface, sending a GET request with query parameters to the API Services.
+- The Presentation Facade routes the request to the PlaceService, which queries the Persistence Facade for places matching the criteria.
+- The PlaceRepository retrieves the data from the DBMS Connection.
+- If places are found, a 200 OK response with the list is returned; if none are found, a 200 OK with an empty list is returned.
+
+#### Layer Contributions:
+
+- Presentation Layer: Handles the request and delivers the response.
+- Business Logic Layer: Processes the criteria and prepares the response.
+- Persistence Layer: Retrieves the filtered list of places from the database.
+
+
+
+This section fulfills the objective of visualizing the interaction between the HBnB application’s layers for key API calls, providing a comprehensive and clear representation of the system’s request-handling processes.
