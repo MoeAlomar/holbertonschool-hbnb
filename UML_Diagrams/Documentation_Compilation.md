@@ -107,7 +107,7 @@ The class diagram represents the internal structure of the Business Logic Layer,
 
 ### Entities and Their Roles:
 
-- ### User:
+### User:
 
 - Role: Represents a user of the application, who can be either a regular user or an administrator.
 - Attributes: Includes personal details (first_name, last_name, email, password), a role flag (is_admin), and audit timestamps (created_at, updated_at).
@@ -131,53 +131,26 @@ The class diagram represents the internal structure of the Business Logic Layer,
 - Attributes: Includes details (name, description) and audit timestamps.
 - Methods: Supports amenity creation (create), updates (update), deletion (delete), listing (list), and retrieval of associated places (getPlaces).
 
-Relationships
+### Relationships
 
-
-
-
-
-User-Place (1 to 0..*): A user can own multiple places, while each place is owned by one user.
-
-
-
-Place-Amenity (0.. to 0..*)*: A many-to-many relationship where a place can have multiple amenities, and an amenity can be associated with multiple places.
-
-
-
-Review-User (0.. to 1)*: Multiple reviews can be written by a single user.
-
-
-
-Review-Place (0.. to 1)*: Multiple reviews can be associated with a single place.
+- User-Place (1 to 0..*): A user can own multiple places, while each place is owned by one user.
+- Place-Amenity (0.. to 0..*)*: A many-to-many relationship where a place can have multiple amenities, and an amenity can be associated with multiple places.
+- Review-User (0.. to 1)*: Multiple reviews can be written by a single user.
+- Review-Place (0.. to 1)*: Multiple reviews can be associated with a single place.
 
 These relationships are depicted using UML associations with appropriate multiplicity, ensuring the diagram accurately reflects the system’s business logic.
 
-Design Decisions
+### Design Decisions
 
-
-
-
-
-Unique Identifiers: Each entity includes a String id attribute (UUID4) for unique identification.
-
-
-
-Timestamps: created_at and updated_at attributes are included for auditing purposes.
-
-
-
-Methods with Parameters: Methods like register and create take parameters to explicitly define the data required for entity creation, enhancing clarity.
-
-
-
-Relationship Management: Methods such as addPlace and addAmenity are included to manage associations between entities, providing a clear interface for interaction.
+- Unique Identifiers: Each entity includes a String id attribute (UUID4) for unique identification.
+- Timestamps: created_at and updated_at attributes are included for auditing purposes.
+- Methods with Parameters: Methods like register and create take parameters to explicitly define the data required for entity creation, enhancing clarity.
+- Relationship Management: Methods such as addPlace and addAmenity are included to manage associations between entities, providing a clear interface for interaction.
 
 This class diagram serves as a blueprint for the Business Logic Layer, ensuring that the core entities and their interactions are well-defined and aligned with the project’s requirements.
 
-
+---
 
 API Interaction Flow
 
 To be completed with the Sequence Diagrams for API calls and explanatory notes.
-
