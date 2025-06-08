@@ -1,19 +1,19 @@
-HBnB Evolution: Technical Documentation
+# HBnB Evolution: Technical Documentation
 
 High-Level Architecture
 
 The HBnB application is structured using a three-layer architecture, designed to separate concerns and enhance modularity. This section presents the high-level package diagram, illustrating the organization of the application’s components across the Presentation Layer, Business Logic Layer, and Persistence Layer, with communication facilitated by the facade pattern.
 
+---
 
-
-📊 Package Diagram
+## 📊 Package Diagram
 
 Below is the high-level package diagram created using Mermaid.js, showcasing the three layers, their key components, and their dependencies:
 
 ![IMG_20250604_130944_008(1)](https://github.com/user-attachments/assets/8a2b7574-bb6c-4a8a-81f4-482a1f3f2270)
 
 
-📝 Explanatory Notes
+### 📝 Explanatory Notes
 
 The package diagram represents the high-level structure of the HBnB application, a simplified AirBnB-like system. Each layer has distinct responsibilities, and the facade pattern is employed to streamline communication between them. Below is a detailed breakdown:
 
@@ -135,7 +135,7 @@ Benefits: Enhances modularity, reduces coupling, and improves maintainability.
 
 
 
-🛠 Design Decisions
+### 🛠 Design Decisions
 
 
 
