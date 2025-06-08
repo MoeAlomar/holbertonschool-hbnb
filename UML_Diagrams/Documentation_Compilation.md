@@ -90,161 +90,46 @@ This high-level architecture provides a clear foundation for the HBnB applicatio
 
 ---
 
-Business Logic Layer
+## Business Logic Layer
 
 The Business Logic Layer forms the heart of the HBnB application, encapsulating the essential entities and their interactions. This section presents a detailed class diagram, illustrating the structure of the key entities—User, Place, Review, and Amenity—along with their attributes, methods, and relationships.
 
-📊 Class Diagram
+## 📊 Class Diagram
 
 Below is the detailed class diagram for the Business Logic Layer, created using Mermaid.js. It showcases the entities, their properties, operations, and how they relate to one another:
 
-classDiagram
-class User {
-    -String id
-    -String first_name
-    -String last_name
-    -String email
-    -String password
-    -Boolean is_admin
-    -DateTime created_at
-    -DateTime updated_at
-    +register(first_name: String, last_name: String, email: String, password: String, is_admin: Boolean)
-    +updateProfile(first_name: String, last_name: String, email: String, password: String)
-    +delete()
-    +getPlaces() List~Place~
-    +addPlace(place: Place)
-}
+![Class_Diagram](https://github.com/user-attachments/assets/f0c9111f-07b6-4523-901c-24d5ca6f00b3)
 
-class Place {
-    -String id
-    -String title
-    -String description
-    -Float price
-    -Float latitude
-    -Float longitude
-    -User owner
-    -List~Amenity~ amenities
-    -DateTime created_at
-    -DateTime updated_at
-    +create(title: String, description: String, price: Float, latitude: Float, longitude: Float, owner: User)
-    +update(title: String, description: String, price: Float, latitude: Float, longitude: Float)
-    +delete()
-    +list() List~Place~
-    +addAmenity(amenity: Amenity)
-    +getReviews() List~Review~
-}
 
-class Review {
-    -String id
-    -Integer rating
-    -String comment
-    -User user
-    -Place place
-    -DateTime created_at
-    -DateTime updated_at
-    +create(rating: Integer, comment: String, user: User, place: Place)
-    +update(rating: Integer, comment: String)
-    +delete()
-    +listByPlace(place: Place) List~Review~
-}
-
-class Amenity {
-    -String id
-    -String name
-    -String description
-    -DateTime created_at
-    -DateTime updated_at
-    +create(name: String, description: String)
-    +update(name: String, description: String)
-    +delete()
-    +list() List~Amenity~
-    +getPlaces() List~Place~
-}
-
-User "1" --> "0..*" Place : owns
-Place "0..*" -- "0..*" Amenity : has
-Review "0..*" --> "1" User : written by
-Review "0..*" --> "1" Place : reviews
-
-📝 Explanatory Notes
+## 📝 Explanatory Notes
 
 The class diagram represents the internal structure of the Business Logic Layer, focusing on the core entities that drive the HBnB application’s functionality. Each entity is designed with attributes and methods that reflect their roles and interactions within the system.
 
-Entities and Their Roles
+### Entities and Their Roles:
 
+- ### User:
 
+- Role: Represents a user of the application, who can be either a regular user or an administrator.
+- Attributes: Includes personal details (first_name, last_name, email, password), a role flag (is_admin), and audit timestamps (created_at, updated_at).
+- Methods: Supports user registration (register), profile updates (updateProfile), deletion (delete), and management of owned places (getPlaces, addPlace).
 
+### Place:
 
+- Role: Represents a property listing created by a user, which can have associated amenities and reviews.
+- Attributes: Includes descriptive details (title, description, price, latitude, longitude), references to the owner (owner), a list of amenities (amenities), and audit timestamps.
+- Methods: Facilitates place creation (create), updates (update), deletion (delete), listing (list), and management of amenities and reviews (addAmenity, getReviews).
 
-User:
+### Review:
 
+- Role: Represents a user’s feedback on a place, including a rating and comment.
+- Attributes: Contains the review content (rating, comment), references to the user and place (user, place), and audit timestamps.
+- Methods: Allows review creation (create), updates (update), deletion (delete), and listing by place (listByPlace).
 
+### Amenity:
 
-
-
-Role: Represents a user of the application, who can be either a regular user or an administrator.
-
-
-
-Attributes: Includes personal details (first_name, last_name, email, password), a role flag (is_admin), and audit timestamps (created_at, updated_at).
-
-
-
-Methods: Supports user registration (register), profile updates (updateProfile), deletion (delete), and management of owned places (getPlaces, addPlace).
-
-
-
-Place:
-
-
-
-
-
-Role: Represents a property listing created by a user, which can have associated amenities and reviews.
-
-
-
-Attributes: Includes descriptive details (title, description, price, latitude, longitude), references to the owner (owner), a list of amenities (amenities), and audit timestamps.
-
-
-
-Methods: Facilitates place creation (create), updates (update), deletion (delete), listing (list), and management of amenities and reviews (addAmenity, getReviews).
-
-
-
-Review:
-
-
-
-
-
-Role: Represents a user’s feedback on a place, including a rating and comment.
-
-
-
-Attributes: Contains the review content (rating, comment), references to the user and place (user, place), and audit timestamps.
-
-
-
-Methods: Allows review creation (create), updates (update), deletion (delete), and listing by place (listByPlace).
-
-
-
-Amenity:
-
-
-
-
-
-Role: Represents a feature (e.g., Wi-Fi, pool) that can be associated with multiple places.
-
-
-
-Attributes: Includes details (name, description) and audit timestamps.
-
-
-
-Methods: Supports amenity creation (create), updates (update), deletion (delete), listing (list), and retrieval of associated places (getPlaces).
+- Role: Represents a feature (e.g., Wi-Fi, pool) that can be associated with multiple places.
+- Attributes: Includes details (name, description) and audit timestamps.
+- Methods: Supports amenity creation (create), updates (update), deletion (delete), listing (list), and retrieval of associated places (getPlaces).
 
 Relationships
 
