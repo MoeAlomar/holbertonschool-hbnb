@@ -1,0 +1,321 @@
+Mernaid code for package diagram {
+---
+config:
+  layout: dagre
+---
+flowchart TD
+ subgraph subGraph0["Presentation Layer"]
+        A["User Interface"]
+        B["API Endpoints"]
+        C["Presentation Facade"]
+  end
+ subgraph subGraph1["Business Layer"]
+        D["Models"]
+        E["Services"]
+  end
+ subgraph subGraph2["Persistence Layer"]
+        F["DBMS Connection"]
+        G["Data Replication"]
+        H["Repositories"]
+        I["Persistence Facade"]
+  end
+    J["Users"] --> A
+    A --> B & J
+    B --> C & A
+    C --> E & B
+    E --> I & D & C
+    I --> H & E
+    H --> F & G
+}
+
+================================================================================================================
+----------------------------------------------------------------------------------------------------------------
+================================================================================================================
+
+Class diagram Mermaid.js {
+
+classDiagram
+class User {
+    -String id
+    -String first_name
+    -String last_name
+    -String email
+    -String password
+    -Boolean is_admin
+    -DateTime created_at
+    -DateTime updated_at
+    +register(first_name: String, last_name: String, email: String, password: String, is_admin: Boolean)
+    +updateProfile(first_name: String, last_name: String, email: String, password: String)
+    +delete()
+    +getPlaces() List~Place~
+    +addPlace(place: Place)
+}
+
+class Place {
+    -String id
+    -String title
+    -String description
+    -Float price
+    -Float latitude
+    -Float longitude
+    -User owner
+    -List~Amenity~ amenities
+    -DateTime created_at
+    -DateTime updated_at
+    +create(title: String, description: String, price: Float, latitude: Float, longitude: Float, owner: User)
+    +update(title: String, description: String, price: Float, latitude: Float, longitude: Float)
+    +delete()
+    +list() List~Place~
+    +addAmenity(amenity: Amenity)
+    +getReviews() List~Review~
+}
+
+class Review {
+    -String id
+    -Integer rating
+    -String comment
+    -User user
+    -Place place
+    -DateTime created_at
+    -DateTime updated_at
+    +create(rating: Integer, comment: String, user: User, place: Place)
+    +update(rating: Integer, comment: String)
+    +delete()
+    +listByPlace(place: Place) List~Review~
+}
+
+class Amenity {
+    -String id
+    -String name
+    -String description
+    -DateTime created_at
+    -DateTime updated_at
+    +create(name: String, description: String)
+    +update(name: String, description: String)
+    +delete()
+    +list() List~Amenity~
+    +getPlaces() List~Place~
+}
+
+User "1" --> "0..*" Place : owns
+Place "0..*" -- "0..*" Amenity : has
+Review "0..*" --> "1" User : written by
+Review "0..*" --> "1" Place : reviews
+
+
+}
+
+
+================================================================================================================
+----------------------------------------------------------------------------------------------------------------
+================================================================================================================
+
+
+Mermaid.js code for first sequence diagram User Registration {
+
+sequenceDiagram
+participant A as Actor
+participant UI as User Interface
+participant API as API Services
+participant PF as Presentation Facade
+participant US as UserService
+participant UM as UserModel
+participant PEF as Persistence Facade
+participant UR as UserRepository
+participant DB as DBMS Connection
+
+A->>UI: Submit Registration (first_name, last_name, email, password, is_admin)
+UI->>API: POST /users (first_name, last_name, email, password, is_admin)
+API->>PF: Forward Request
+PF->>US: register(first_name, last_name, email, password, is_admin)
+US->>UM: Create User Object
+US->>UM: Validate (e.g., email format)
+UM->>PEF: Check Email Uniqueness
+PEF->>UR: findByEmail(email)
+UR->>DB: Select User by Email
+alt Email Exists
+    DB-->>UR: User Found
+    UR-->>PEF: User Found
+    PEF-->>UM: Error: Email Taken
+    UM-->>US: Error: Invalid Data
+    US-->>PF: Error Response
+    PF-->>API: Error Response
+    API-->>UI: 400 Bad Request
+    UI-->>A: Display Error
+else Email Unique
+    DB-->>UR: No User Found
+    UR-->>PEF: No User Found
+    PEF-->>UM: Success
+    UM-->>US: Valid Data
+    US->>PEF: Save User
+    PEF->>UR: save(user)
+    UR->>DB: Insert User
+    DB-->>UR: Success
+    UR-->>PEF: Success
+    PEF-->>US: Success
+    US-->>PF: Success Response
+    PF-->>API: Success Response
+    API-->>UI: 201 Created (User ID)
+    UI-->>A: Display Success
+end
+
+}
+
+
+================================================================================================================
+----------------------------------------------------------------------------------------------------------------
+================================================================================================================
+
+
+Mermaid.js code for second sequence diagram place creation {
+
+sequenceDiagram
+participant A as Actor
+participant UI as User Interface
+participant API as API Services
+participant PF as Presentation Facade
+participant PS as PlaceService
+participant PM as PlaceModel
+participant PEF as Persistence Facade
+participant PR as PlaceRepository
+participant DB as DBMS Connection
+
+A->>UI: Submit Place Data (title, description, price, latitude, longitude)
+UI->>API: POST /places (title, description, price, latitude, longitude)
+API->>PF: Forward Request
+PF->>PS: create(title, description, price, latitude, longitude, owner)
+PS->>PM: Create Place Object
+PS->>PM: Set Owner (authenticated user)
+PS->>PM: Validate (e.g., price > 0)
+PM->>PEF: Check Owner Existence
+PEF->>PR: findById(owner_id)
+PR->>DB: Select User by ID
+alt Validation Fails (e.g., Invalid Price or Owner Not Found)
+    DB-->>PR: Error or No User
+    PR-->>PEF: Error
+    PEF-->>PM: Error: Invalid Data
+    PM-->>PS: Error: Invalid Data
+    PS-->>PF: Error Response
+    PF-->>API: Error Response
+    API-->>UI: 400 Bad Request
+    UI-->>A: Display Error
+else Validation Succeeds
+    DB-->>PR: User Found
+    PR-->>PEF: User Found
+    PEF-->>PM: Success
+    PM-->>PS: Valid Data
+    PS->>PEF: Save Place
+    PEF->>PR: save(place)
+    PR->>DB: Insert Place
+    DB-->>PR: Success
+    PR-->>PEF: Success
+    PEF-->>PS: Success
+    PS-->>PF: Success Response
+    PF-->>API: Success Response
+    API-->>UI: 201 Created (Place ID)
+    UI-->>A: Display Success
+end
+
+}
+
+
+================================================================================================================
+----------------------------------------------------------------------------------------------------------------
+================================================================================================================
+
+
+Mermaid.js code for third sequence diagram Review Submission {
+
+sequenceDiagram
+participant A as Actor
+participant UI as User Interface
+participant API as API Services
+participant PF as Presentation Facade
+participant RS as ReviewService
+participant RM as ReviewModel
+participant PEF as Persistence Facade
+participant RR as ReviewRepository
+participant DB as DBMS Connection
+
+A->>UI: Submit Review (rating, comment, user_id, place_id)
+UI->>API: POST /reviews (rating, comment, user_id, place_id)
+API->>PF: Forward Request
+PF->>RS: create(rating, comment, user, place)
+RS->>RM: Create Review Object
+RS->>RM: Set User and Place (from user_id, place_id)
+RS->>RM: Validate (e.g., rating 1-5)
+RM->>PEF: Check User and Place Existence
+PEF->>RR: findById(user_id, place_id)
+RR->>DB: Select User and Place by ID
+alt Validation Fails (e.g., Invalid Rating or User/Place Not Found)
+    DB-->>RR: Error or No Entity
+    RR-->>PEF: Error
+    PEF-->>RM: Error: Invalid Data
+    RM-->>RS: Error: Invalid Data
+    RS-->>PF: Error Response
+    PF-->>API: Error Response
+    API-->>UI: 400 Bad Request
+    UI-->>A: Display Error
+else Validation Succeeds
+    DB-->>RR: User and Place Found
+    RR-->>PEF: Entities Found
+    PEF-->>RM: Success
+    RM-->>RS: Valid Data
+    RS->>PEF: Save Review
+    PEF->>RR: save(review)
+    RR->>DB: Insert Review
+    DB-->>RR: Success
+    RR-->>PEF: Success
+    PEF-->>RS: Success
+    RS-->>PF: Success Response
+    PF-->>API: Success Response
+    API-->>UI: 201 Created (Review ID)
+    UI-->>A: Display Success
+end
+
+}
+
+
+================================================================================================================
+----------------------------------------------------------------------------------------------------------------
+================================================================================================================
+
+
+Mermaid.js code for forth and last sequence diagram Fetching places {
+
+sequenceDiagram
+participant A as Actor
+participant UI as User Interface
+participant API as API Services
+participant PF as Presentation Facade
+participant PS as PlaceService
+participant PEF as Persistence Facade
+participant PR as PlaceRepository
+participant DB as DBMS Connection
+
+A->>UI: Request Place List (criteria: e.g., latitude, longitude, price_range)
+UI->>API: GET /places (query params: criteria)
+API->>PF: Forward Request
+PF->>PS: list(criteria)
+PS->>PEF: Fetch Places
+PEF->>PR: findAll(criteria)
+PR->>DB: Select Places (with criteria)
+alt Places Found
+    DB-->>PR: List of Places
+    PR-->>PEF: List of Places
+    PEF-->>PS: List of Places
+    PS->>PF: Success Response (List of Places)
+    PF->>API: Success Response
+    API->>UI: 200 OK (List of Places)
+    UI-->>A: Display Place List
+else No Places Found
+    DB-->>PR: Empty Result
+    PR-->>PEF: Empty Result
+    PEF-->>PS: Empty Result
+    PS->>PF: Empty Response
+    PF->>API: Empty Response
+    API->>UI: 200 OK (Empty List)
+    UI-->>A: Display Empty List
+end
+
+}
