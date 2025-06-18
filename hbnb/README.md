@@ -13,7 +13,13 @@ This project is a modular Flask-based REST API for an AirBnB-like app.
 
 ## Setup
 
-Install requirements:
+#### Install requirements:
 
 ```bash
 pip install -r requirements.txt
+```
+
+#### Run the app:
+
+```bash
+python run.py
