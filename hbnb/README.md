@@ -11,6 +11,18 @@ This project is a modular Flask-based REST API for an AirBnB-like app.
 - `config.py`: Environment config
 - `run.py`: App entry point
 
+
+## Business Logic
+
+Core entity classes:
+
+- **User**: first_name, last_name, email, is_admin
+- **Place**: title, price, location, owned by User, can have Reviews and Amenities
+- **Review**: text and rating, linked to a Place and User
+- **Amenity**: e.g. "Wi-Fi", associated with Places
+
+All classes inherit from BaseModel, which manages `id`, `created_at`, and `updated_at`.
+
 ## Setup
 
 #### Install requirements:
