@@ -1,5 +1,4 @@
-from hbnb.app.models.BaseModel import BaseModel
-
+from .BaseModel import BaseModel
 
 class Amenity(BaseModel):
     def __init__(self, name):

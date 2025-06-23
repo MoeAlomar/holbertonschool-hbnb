@@ -1,6 +1,5 @@
-from hbnb.app.models.BaseModel import BaseModel
-from hbnb.app.models.user import User
-
+from .BaseModel import BaseModel
+from .user import User
 class Place(BaseModel):
     def __init__(self, title, description, price, latitude, longitude, owner):
         super().__init__()
