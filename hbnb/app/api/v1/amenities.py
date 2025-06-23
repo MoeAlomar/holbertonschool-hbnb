@@ -16,6 +16,10 @@ class AmenityList(Resource):
     def post(self):
         """Register a new amenity"""
         # Placeholder for the logic to register a new amenity
+        amenity_data = api.payload
+        for existing_aminites in facade.get_all_amenities():
+            if existing_aminites == amenity_data:
+                return({'error': 'Amenity already exists'})
 
 
     @api.response(200, 'List of amenities retrieved successfully')

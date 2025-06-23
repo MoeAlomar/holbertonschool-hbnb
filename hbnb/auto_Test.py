@@ -24,3 +24,8 @@ if len(users) > 1:
     update = {"first_name": "Bobby", "last_name": "Johnson", "email": "bobby.j@example.com"}
     r = requests.put(base_url + user_id, json=update)
     print("\nPUT:", r.status_code, r.json())
+
+amenity = {"name": "Wifi"}
+
+r = requests.post(base_url, json=amenity)
+print("Post: ", r.status_code, r.json())
