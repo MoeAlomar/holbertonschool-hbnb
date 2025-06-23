@@ -5,7 +5,7 @@ base_url = "http://127.0.0.1:5000/api/v1/users/"
 # Add two users
 users = [
     {"first_name": "Alice", "last_name": "Smith", "email": "alice.smith@example.com"},
-    {"first_name": "Bob", "last_name": "Jones", "email": "alice.smith@example.com"}
+    {"first_name": "Bob", "last_name": "Jones", "email": "alice.smith@exmample.com"}
 ]
 
 for user in users:
