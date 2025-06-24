@@ -20,11 +20,11 @@ class Place(BaseModel):
             raise ValueError("All fields are required")
         if not isinstance(title, str) or len(title) > 100 or not title:
             raise ValueError("Title must be a non-empty string, max 100 characters")
-        if not isinstance(price, (int, float)) or price <= 0:
+        if not isinstance(price, float) or price <= 0:
             raise ValueError("Price must be a positive number")
-        if not isinstance(latitude, (int, float)) or latitude < -90 or latitude > 90:
+        if not isinstance(latitude, float) or latitude < -90 or latitude > 90:
             raise ValueError("Latitude must be between -90 and 90")
-        if not isinstance(longitude, (int, float)) or longitude < -180 or longitude > 180:
+        if not isinstance(longitude, float) or longitude < -180 or longitude > 180:
             raise ValueError("Longitude must be between -180 and 180")
         if not isinstance(owner, User): # might need to check all user.
             raise ValueError("Owner must be a valid User instance")
