@@ -1,6 +1,7 @@
 import requests
 
 base_url = "http://127.0.0.1:5000/api/v1/users/"
+amenity_url = "http://127.0.0.1:5000/api/v1/amenities/"
 
 # Add two users
 users = [
@@ -25,7 +26,16 @@ if len(users) > 1:
     r = requests.put(base_url + user_id, json=update)
     print("\nPUT:", r.status_code, r.json())
 
-amenity = {"name": "Wifi"}
+amenities = [ {'name': "Wi-fi"},
+            {'name': "Chair"},
+            {'name': "TV"}
+            ]
+for amenity in amenities:
+    e = requests.post(amenity_url, json=amenity)
+    print("Post: ", e.status_code, e.json())
+r = requests.get(amenity_url)
+print("Get all amenities: ", r.status_code, r.json())
+amenities = r.json()
+amenity_id = amenities[0]["id"]
+r = requests.put(amenity_url + amenity_id, json={"name": "Bed"})
 
-r = requests.post(base_url, json=amenity)
-print("Post: ", r.status_code, r.json())

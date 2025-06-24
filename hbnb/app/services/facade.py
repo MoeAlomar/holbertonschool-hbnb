@@ -56,10 +56,15 @@ class HBnBFacade:
 
     def update_amenity(self, amenity_id, amenity_data):
         # Placeholder for logic to update an amenity
+        allowed_fields = ['name']
+        filtered_data = {k: v for k, v in amenity_data.items() if k in allowed_fields}
         amenity = self.amenity_repo.get(amenity_id)
-
         if not amenity:
             return None
-        amenity.update(amenity_data)
+        if 'name' in filtered_data:
+            existing_amenity = self.amenity_repo.get_by_attribute('name', filtered_data['name'])
+            if existing_amenity and existing_amenity.id != amenity_id:
+                return {'error': 'An amenity with this name already exists'}
+        amenity.update(filtered_data)
         return amenity
 

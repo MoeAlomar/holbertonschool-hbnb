@@ -17,17 +17,22 @@ class AmenityList(Resource):
         """Register a new amenity"""
         # Placeholder for the logic to register a new amenity
         amenity_data = api.payload
-        for existing_aminites in facade.get_all_amenities():
-            if existing_aminites == amenity_data:
-                return({'error': 'Amenity already exists'})
+        all_amenities = facade.get_all_amenities()
+        if 'name' not in amenity_data:
+            return({'error': 'Amenity name is required'}, 400)
+        for existing in all_amenities:
+            if existing.name == amenity_data.get('name'):
+                return({'error': 'Amenity already exists'}, 400)
+        new_amenity = facade.create_amenity(amenity_data)
+        return {'id': new_amenity.id, 'name': new_amenity.name}, 201
 
 
     @api.response(200, 'List of amenities retrieved successfully')
     def get(self):
         """Retrieve a list of all amenities"""
         # Placeholder for logic to return a list of all amenities
-        pass
-
+        amenities = facade.get_all_amenities()
+        return [{'id': amenity.id, 'name': amenity.name} for amenity in amenities], 200
 @api.route('/<amenity_id>')
 class AmenityResource(Resource):
     @api.response(200, 'Amenity details retrieved successfully')
@@ -35,7 +40,10 @@ class AmenityResource(Resource):
     def get(self, amenity_id):
         """Get amenity details by ID"""
         # Placeholder for the logic to retrieve an amenity by ID
-        pass
+        amenity = facade.get_amenity(amenity_id)
+        if not amenity:
+            return {'error': 'Amenity not found'}, 404
+        return {'id': amenity.id, 'name': amenity.name}, 200
 
     @api.expect(amenity_model)
     @api.response(200, 'Amenity updated successfully')
@@ -44,4 +52,10 @@ class AmenityResource(Resource):
     def put(self, amenity_id):
         """Update an amenity's information"""
         # Placeholder for the logic to update an amenity by ID
-        pass
+        amenity_data = api.payload
+        result = facade.update_amenity(amenity_id, amenity_data)
+        if isinstance(result, dict) and 'error' in result:
+            return result, 400
+        if not result:
+            return {'error': 'Amenity not found'}, 404
+        return {'id': result.id, 'name': result.name}, 200
