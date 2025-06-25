@@ -173,6 +173,7 @@ class HBnBFacade:
         review = Review(text=text, rating=rating, user=user, place=place)
         self.review_repo.add(review)
         place.reviews.append(review)
+        self.place_repo.update_obj(place)
         return review
 
     def get_review(self, review_id):
@@ -184,8 +185,13 @@ class HBnBFacade:
     def get_reviews_by_place(self, place_id):
         place = self.place_repo.get(place_id)
         if not place:
-            raise ValueError("Place not found")
-        return place.reviews
+            return None  # So your API can return 404
+
+        print(f"Fetching reviews for place: {place_id}")
+        return [
+            review for review in self.review_repo.get_all()
+            if review.place.id == place_id
+        ]
 
     def update_review(self, review_id, review_data):
         review = self.review_repo.get(review_id)

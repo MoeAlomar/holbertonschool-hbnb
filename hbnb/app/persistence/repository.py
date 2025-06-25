@@ -18,6 +18,10 @@ class Repository(ABC):
         pass
 
     @abstractmethod
+    def update_obj(self, obj):
+        pass
+
+    @abstractmethod
     def delete(self, obj_id):
         pass
 
@@ -43,6 +47,13 @@ class InMemoryRepository(Repository):
         obj = self.get(obj_id)
         if obj:
             obj.update(data)
+
+    def update_obj(self, obj):
+        """Update an object in the repository"""
+        if obj.id in self._storage:
+            self._storage[obj.id] = obj
+        else:
+            raise ValueError(f"Object with id {obj.id} not found")
 
     def delete(self, obj_id):
         if obj_id in self._storage:
