@@ -16,6 +16,13 @@ user_model = api.model('PlaceUser', {
     'email': fields.String(description='Email of the owner')
 })
 
+review_model = api.model('PlaceReview', {
+    'id': fields.String(description='Review ID'),
+    'text': fields.String(description='Text of the review'),
+    'rating': fields.Integer(description='Rating of the place (1-5)'),
+    'user_id': fields.String(description='ID of the user')
+})
+
 # Input model
 place_input_model = api.model('PlaceInput', {
     'title': fields.String(required=True, description='Title of the place'),
@@ -36,7 +43,8 @@ place_output_model = api.model('PlaceOutput', {
     'latitude': fields.Float(description='Latitude of the place'),
     'longitude': fields.Float(description='Longitude of the place'),
     'owner': fields.Nested(user_model, description='Owner of the place'),
-    'amenities': fields.List(fields.Nested(amenity_model), description='List of amenities')
+    'amenities': fields.List(fields.Nested(amenity_model), description='List of amenities'),
+    'reviews': fields.List(fields.Nested(review_model), description='List of reviews')
 })
 
 place_list_model = api.model('PlaceList', {
@@ -49,7 +57,7 @@ place_list_model = api.model('PlaceList', {
 @api.route('/')
 class PlaceList(Resource):
     @api.expect(place_input_model, validate=True)
-    @api.response(201, 'Place successfully(nodescription=True)')
+    @api.response(201, 'Place successfully created')
     def post(self):
         """Register a new place"""
         place_data = api.payload
@@ -101,7 +109,13 @@ class PlaceResource(Resource):
                 'last_name': place.owner.last_name,
                 'email': place.owner.email
             },
-            'amenities': [{'id': amenity.id, 'name': amenity.name} for amenity in place.amenities]
+            'amenities': [{'id': amenity.id, 'name': amenity.name} for amenity in place.amenities],
+            'reviews': [{
+                'id': review.id,
+                'text': review.text,
+                'rating': review.rating,
+                'user_id': review.user.id
+            } for review in place.reviews]
         }
 
     @api.expect(place_input_model, validate=True)
@@ -131,3 +145,23 @@ class PlaceResource(Resource):
             }
         except ValueError as e:
             api.abort(400, str(e))
+
+
+
+@api.route('/places/<place_id>/reviews')
+class PlaceReviewList(Resource):
+    def get(self, place_id):
+        place = facade.get_place(place_id)
+        if not place:
+            return {'error': 'Place not found'}, 404
+
+        reviews = [
+            {
+                'id': review.id,
+                'text': review.text,
+                'rating': review.rating,
+                'user_id': review.user.id
+            }
+            for review in place.reviews
+        ]
+        return reviews, 200

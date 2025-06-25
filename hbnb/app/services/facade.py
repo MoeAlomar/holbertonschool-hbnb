@@ -1,4 +1,5 @@
 from app.models.amenity import Amenity
+from app.models.review import Review
 from app.models.user import User
 from app.persistence.repository import InMemoryRepository
 from app.models.place import Place
@@ -151,3 +152,63 @@ class HBnBFacade:
 
         place.save()
         return place
+
+
+    # Review area #
+
+    def create_review(self, review_data):
+        user_id = review_data.get('user_id')
+        place_id = review_data.get('place_id')
+        text = review_data.get('text')
+        rating = review_data.get('rating')
+
+        user = self.user_repo.get(user_id)
+        if not user:
+            raise ValueError("User not found")
+
+        place = self.place_repo.get(place_id)
+        if not place:
+            raise ValueError("Place not found")
+
+        review = Review(text=text, rating=rating, user=user, place=place)
+        self.review_repo.add(review)
+        place.reviews.append(review)
+        return review
+
+    def get_review(self, review_id):
+        return self.review_repo.get(review_id)
+
+    def get_all_reviews(self):
+        return self.review_repo.get_all()
+
+    def get_reviews_by_place(self, place_id):
+        place = self.place_repo.get(place_id)
+        if not place:
+            raise ValueError("Place not found")
+        return place.reviews
+
+    def update_review(self, review_id, review_data):
+        review = self.review_repo.get(review_id)
+        if not review:
+            return None
+
+        if 'text' in review_data:
+            review.text = review_data['text']
+
+        if 'rating' in review_data:
+            rating = review_data['rating']
+            if not isinstance(rating, int) or rating < 1 or rating > 5:
+                raise ValueError("Rating must be an integer between 1 and 5")
+            review.rating = rating
+
+        review.save()
+        return review
+
+    def delete_review(self, review_id):
+        review = self.review_repo.get(review_id)
+        if not review:
+            return None
+
+        review.place.reviews.remove(review)
+        self.review_repo.delete(review_id)
+        return True

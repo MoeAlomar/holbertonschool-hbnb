@@ -1,54 +1,43 @@
 import requests
 
-base_url = "http://localhost:5000/api/v1"
-place_url = f"{base_url}/places/"
-user_url = f"{base_url}/users/"
-amenity_url = f"{base_url}/amenities/"
+BASE_URL = "http://localhost:5000/api/v1"
+user_url = f"{BASE_URL}/users/"
+place_url = f"{BASE_URL}/places/"
+review_url = f"{BASE_URL}/reviews/"
+place_reviews_url = lambda pid: f"{BASE_URL}/places/{pid}/reviews/"
 
-# 1. Create a user
-user_data = {"first_name": "Test", "last_name": "Owner", "email": "test.owner@example.com"}
-r = requests.post(user_url, json=user_data)
-owner = r.json()
-print("Created user:", r.status_code, owner)
+# --- Create a test user ---
+user_data = {
+    "first_name": "Test",
+    "last_name": "User",
+    "email": "test.user@example.com"
+}
+user_res = requests.post(user_url, json=user_data)
+print("Create user:", user_res.status_code, user_res.json())
+user_id = user_res.json()["id"]
 
-# 2. Create amenities
-amenities = []
-for name in ["Wi-Fi", "Balcony"]:
-    r = requests.post(amenity_url, json={"name": name})
-    print("Created amenity:", r.status_code, r.json())
-    amenities.append(r.json()["id"])
-
-# 3. Create a place
+# --- Create a test place ---
 place_data = {
-    "title": "Ocean View Apartment",
-    "description": "A sunny place by the beach",
-    "price": 250.0,
-    "latitude": 34.01,
-    "longitude": -118.49,
-    "owner_id": owner["id"],
-    "amenities": amenities
+    "title": "Test House",
+    "description": "Nice for testing",
+    "price": 99.99,
+    "latitude": 37.77,
+    "longitude": -122.41,
+    "owner_id": user_id,
+    "amenities": []
 }
-r = requests.post(place_url, json=place_data)
-place = r.json()
-print("Created place:", r.status_code, place)
+place_res = requests.post(place_url, json=place_data)
+print("Create place:", place_res.status_code, place_res.json())
+place_id = place_res.json()["id"]
 
-# 4. Get all places
-r = requests.get(place_url)
-print("All places:", r.status_code, r.json())
-
-# 5. Update the place
-updated_data = {
-    "title": "Ocean View Condo",
-    "description": "Even sunnier!",
-    "price": 300.0,
-    "latitude": 34.02,
-    "longitude": -118.50,
-    "owner_id": owner["id"],
-    "amenities": amenities
+# --- Create a review ---
+review_data = {
+    "text": "Lovely stay!",
+    "rating": 5,
+    "user_id": user_id,
+    "place_id": place_id
 }
-r = requests.put(place_url + place["id"], json=updated_data)
-print("Updated place:", r.status_code, r.json())
+review_res = requests.post(review_url, json=review_data)
+print("Create review:", review_res.status_code, review_res.json())
+review_id = review_res.json()["id"]
 
-# 6. Get place by ID
-r = requests.get(place_url + place["id"])
-print("Place by ID:", r.status_code, r.json())
