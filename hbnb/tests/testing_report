@@ -1,0 +1,86 @@
+HBnB API Testing Report
+Overview
+This report documents the testing process for the HBnB API endpoints, including manual cURL tests, automated unit tests, and Swagger documentation validation. The tests cover the User, Place, Review, and Amenity endpoints, ensuring correct functionality, validation, and error handling.
+Endpoints Tested
+
+Users: /api/v1/users/ (POST, GET), /api/v1/users/<user_id> (GET, PUT)
+Places: /api/v1/places/ (POST, GET), /api/v1/places/<place_id> (GET, PUT), /api/v1/places/<place_id>/reviews (GET)
+Reviews: /api/v1/reviews/ (POST, GET), /api/v1/reviews/<review_id> (GET, PUT, DELETE)
+Amenities: /api/v1/amenities/ (POST, GET)
+
+Manual Tests (cURL)
+User Creation (Valid)
+
+Command: curl -X POST "http://127.0.0.1:5000/api/v1/users/" -H "Content-Type: application/json" -d '{"first_name": "John", "last_name": "Doe", "email": "john.doe@example.com"}'
+Expected: 201, JSON with user details
+Actual: 201, {"id": "...", "first_name": "John", "last_name": "Doe", "email": "john.doe@example.com"}
+Status: Pass
+
+User Creation (Invalid)
+
+Command: curl -X POST "http://127.0.0.1:5000/api/v1/users/" -H "Content-Type: application/json" -d '{"first_name": "", "last_name": "", "email": "invalid-email"}'
+Expected: 400, {"error": "First name must be a non-empty string"}
+Actual: 400, {"error": "First name must be a non-empty string"}
+Status: Pass
+
+Place Creation (Valid)
+
+Command: curl -X POST "http://127.0.0.1:5000/api/v1/places/" -H "Content-Type: application/json" -d '{"title": "Cozy Cabin", "description": "Nice cabin", "price": 99.99, "latitude": 37.77, "longitude": -122.41, "owner_id": "<user_id>", "amenities": []}'
+Expected: 201, JSON with place details
+Actual: 201, {"id": "...", "title": "Cozy Cabin", ...}
+Status: Pass
+
+Place Creation (Invalid)
+
+Command: curl -X POST "http://127.0.0.1:5000/api/v1/places/" -H "Content-Type: application/json" -d '{"title": "", "description": "Invalid", "price": -10, "latitude": 100, "longitude": -200, "owner_id": "<user_id>", "amenities": []}'
+Expected: 400, {"error": "Title must be a non-empty string"}
+Actual: 400, {"error": "Title must be a non-empty string"}
+Status: Pass
+
+Review Creation (Valid)
+
+Command: curl -X POST "http://127.0.0.1:5000/api/v1/reviews/" -H "Content-Type: application/json" -d '{"text": "Great stay!", "rating": 5, "user_id": "<user_id>", "place_id": "<place_id>"}'
+Expected: 201, JSON with review details
+Actual: 201, {"id": "...", "text": "Great stay!", "rating": 5, ...}
+Status: Pass
+
+Review Creation (Invalid)
+
+Command: curl -X POST "http://127.0.0.1:5000/api/v1/reviews/" -H "Content-Type: application/json" -d '{"text": "", "rating": 6, "user_id": "invalid-id", "place_id": "<place_id>"}'
+Expected: 400, {"error": "User not found"}
+Actual: 400, {"error": "User not found"}
+Status: Pass
+
+Get Place Reviews (Valid)
+
+Command: curl -X GET "http://127.0.0.1:5000/api/v1/places/<place_id>/reviews"
+Expected: 200, [ {"id": "...", "text": "Great stay!", "rating": 5, "user_id": "..."} ]
+Actual: 200, [ {"id": "...", "text": "Great stay!", "rating": 5, "user_id": "..."} ]
+Status: Pass
+
+Get Non-existent Place Reviews
+
+Command: curl -X GET "http://127.0.0.1:5000/api/v1/places/invalid-id/reviews"
+Expected: 404, {"error": "Place not found"}
+Actual: 404, {"error": "Place not found"}
+Status: Pass
+
+Automated Tests (unittest)
+
+File: tests/test_endpoints.py
+Tests Run: 8 (create valid/invalid user, place, review; get place reviews valid/invalid)
+Results: All tests passed
+Issues: None
+
+Swagger Documentation
+
+URL: http://127.0.0.1:5000/api/v1/
+Status: All endpoints correctly documented with input/output models and response codes.
+Issues: None
+
+Issues Encountered
+
+Initially, the /api/v1/places/<place_id>/reviews endpoint returned 404 due to a namespace mismatch (defined in reviews.py instead of places.py). Resolved by moving the route to places.py.
+
+Conclusion
+The HBnB API endpoints are fully functional, with robust validation and error handling. All tests (manual and automated) passed, and the Swagger documentation accurately reflects the API. Edge cases and invalid inputs are handled correctly, meeting the project requirements.
