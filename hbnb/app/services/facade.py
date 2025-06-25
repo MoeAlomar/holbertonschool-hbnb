@@ -43,6 +43,11 @@ class HBnBFacade:
         user.update(filtered_data)
         return user
 
+
+
+    # Amenity area #
+
+
     def create_amenity(self, amenity_data):
         # Placeholder for logic to create an amenity
         amenity = Amenity(**amenity_data)
@@ -71,43 +76,78 @@ class HBnBFacade:
         amenity.update(filtered_data)
         return amenity
 
+
+
+    # Place area #
+
     def create_place(self, place_data):
         owner_id = place_data.get('owner_id')
-        owner = self.get_user(owner_id)
+        if not owner_id:
+            raise ValueError("Owner ID is required")
+        owner = self.user_repo.get(owner_id)
         if not owner:
-            raise ValueError(f"User with id {owner_id} not found")
+            raise ValueError("Owner not found")
 
-        # Remove 'owner_id' from place_data to avoid passing it to Place's __init__
-        place_data = dict(place_data)  # Create a copy to avoid mutating original
-        del place_data['owner_id']
+        amenity_ids = place_data.get('amenities', [])
+        amenities = []
+        for amenity_id in amenity_ids:
+            amenity = self.amenity_repo.get(amenity_id)
+            if not amenity:
+                raise ValueError(f"Amenity {amenity_id} not found")
+            amenities.append(amenity)
 
-        # Pass the owner object to the Place constructor
-        place = Place(owner=owner, **place_data)
+        try:
+            place = Place(
+                title=place_data['title'],
+                description=place_data.get('description', ''),
+                price=place_data['price'],
+                latitude=place_data['latitude'],
+                longitude=place_data['longitude'],
+                owner=owner
+            )
+        except ValueError as e:
+            raise ValueError(str(e))
+
+        for amenity in amenities:
+            place.add_amenity(amenity)
 
         self.place_repo.add(place)
         return place
 
     def get_place(self, place_id):
-        # Placeholder for logic to retrieve a place by ID, including associated owner and amenities
         return self.place_repo.get(place_id)
 
     def get_all_places(self):
-        # Placeholder for logic to retrieve all places
         return self.place_repo.get_all()
 
-    def get_place_by_title(self, title):
-        self.place_repo.get_by_attribute('title', title)
-
     def update_place(self, place_id, place_data):
-        # Placeholder for logic to update a place
-        allowed_fields = ['title', 'description', 'price', 'latitude', 'longitude', 'amenities']
-        filtered_data = {k: v for k, v in place_data.items() if k in allowed_fields}
         place = self.place_repo.get(place_id)
         if not place:
             return None
-        if 'title' in filtered_data:
-            existing_place = self.place_repo.get_by_attribute('title', filtered_data['title'])
-            if existing_place and existing_place.id != place_id:
-                return {'error': 'A place with this title already exists'}
-            place.update(filtered_data)
 
+        allowed_fields = ['title', 'description', 'price', 'latitude', 'longitude']
+        for field in allowed_fields:
+            if field in place_data:
+                try:
+                    setattr(place, field, place_data[field])
+                except ValueError as e:
+                    raise ValueError(str(e))
+
+        if 'owner_id' in place_data:
+            owner = self.user_repo.get(place_data['owner_id'])
+            if not owner:
+                raise ValueError("Owner not found")
+            place.owner = owner
+
+        if 'amenities' in place_data:
+            amenity_ids = place_data['amenities']
+            amenities = []
+            for amenity_id in amenity_ids:
+                amenity = self.amenity_repo.get(amenity_id)
+                if not amenity:
+                    raise ValueError(f"Amenity {amenity_id} not found")
+                amenities.append(amenity)
+            place.amenities = amenities
+
+        place.save()
+        return place

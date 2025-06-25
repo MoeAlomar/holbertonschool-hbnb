@@ -1,5 +1,6 @@
 from .BaseModel import BaseModel
 from .user import User
+from .amenity import  Amenity
 class Place(BaseModel):
     def __init__(self, title, description, price, latitude, longitude, owner):
         super().__init__()
@@ -35,4 +36,7 @@ class Place(BaseModel):
 
     def add_amenity(self, amenity):
         """Add an amenity to the place."""
-        self.amenities.append(amenity)
+        if not isinstance(amenity, Amenity):
+            raise ValueError("Amenity must be a valid Amenity instance")
+        if amenity not in self.amenities:
+            self.amenities.append(amenity)
