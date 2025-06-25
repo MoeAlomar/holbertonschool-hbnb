@@ -72,8 +72,18 @@ class HBnBFacade:
         return amenity
 
     def create_place(self, place_data):
-        # Placeholder for logic to create a place, including validation for price, latitude, and longitude
-        place = Place(**place_data)
+        owner_id = place_data.get('owner_id')
+        owner = self.get_user(owner_id)
+        if not owner:
+            raise ValueError(f"User with id {owner_id} not found")
+
+        # Remove 'owner_id' from place_data to avoid passing it to Place's __init__
+        place_data = dict(place_data)  # Create a copy to avoid mutating original
+        del place_data['owner_id']
+
+        # Pass the owner object to the Place constructor
+        place = Place(owner=owner, **place_data)
+
         self.place_repo.add(place)
         return place
 
@@ -90,5 +100,14 @@ class HBnBFacade:
 
     def update_place(self, place_id, place_data):
         # Placeholder for logic to update a place
-        pass
+        allowed_fields = ['title', 'description', 'price', 'latitude', 'longitude', 'amenities']
+        filtered_data = {k: v for k, v in place_data.items() if k in allowed_fields}
+        place = self.place_repo.get(place_id)
+        if not place:
+            return None
+        if 'title' in filtered_data:
+            existing_place = self.place_repo.get_by_attribute('title', filtered_data['title'])
+            if existing_place and existing_place.id != place_id:
+                return {'error': 'A place with this title already exists'}
+            place.update(filtered_data)
 
