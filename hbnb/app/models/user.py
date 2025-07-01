@@ -1,8 +1,9 @@
 from .BaseModel import BaseModel
 import re
 
+
 class User(BaseModel):
-    def __init__(self, first_name, last_name, email, password="", is_admin=False):
+    def __init__(self, first_name, last_name, email, password, is_admin=False):
         super().__init__()
 
         self.validate_User(first_name, last_name, email) # validate password later
@@ -13,7 +14,15 @@ class User(BaseModel):
         self.password = password  # Should be hashed in a real app
         self.is_admin = bool(is_admin)
 
+    def hash_password(self, password):
+        """Hashes the password before storing it."""
+        from app import bcrypt
+        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
 
+    def verify_password(self, password):
+        """Verifies if the provided password matches the hashed password."""
+        from app import bcrypt
+        return bcrypt.check_password_hash(self.password, password)
 
     def validate_User(self, first_name, last_name, email):
         if not first_name or not last_name or not email:

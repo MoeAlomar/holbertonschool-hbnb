@@ -10,11 +10,14 @@ place_reviews_url = lambda pid: f"{BASE_URL}/places/{pid}/reviews/"
 user_data = {
     "first_name": "Test",
     "last_name": "User",
-    "email": "test.user@example.com"
+    "email": "test.user@example.com",
+    "password": "1234"
 }
 user_res = requests.post(user_url, json=user_data)
 print("Create user:", user_res.status_code, user_res.json())
 user_id = user_res.json()["id"]
+user_get = requests.get(f"{user_url}{user_id}")
+print("Get user:", user_get.status_code, user_get.json())
 
 # --- Create a test place ---
 place_data = {
@@ -82,6 +85,6 @@ print("Place info (with reviews):", place_info.text)
 # Get reviews by place (should match the above)
 place_reviews = requests.get(f"http://localhost:5000/api/v1/places/{place_id}/reviews")
 print("Place reviews status:", place_reviews.status_code)
-print("Place reviews response:", repr(place_reviews.text))  # Again, use repr to avoid surprises
+print("Place reviews response:", place_reviews.text)  # Again, use repr to avoid surprises
 
 
