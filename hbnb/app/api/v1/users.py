@@ -37,13 +37,11 @@ class UserList(Resource):
 class UserResource(Resource):
     @jwt_required()
     @api.response(200, 'User details retrieved successfully')
+    @api.response(401, 'Unauthorized')
     @api.response(404, 'User not found')
     def get(self, user_id):
         """Get user details by ID"""
-        current_user = get_jwt_identity()
-        if current_user['id'] != user_id and not current_user['is_admin']:
-            return {'error': 'Access denied'}, 403
-
+        current_user_id = get_jwt_identity()
         user = facade.get_user(user_id)
         if not user:
             return {'error': 'User not found'}, 404
@@ -52,14 +50,12 @@ class UserResource(Resource):
     @jwt_required()
     @api.expect(user_model, validate=True)
     @api.response(200, 'User successfully updated')
+    @api.response(401, 'Unauthorized')
     @api.response(404, 'User not found')
     @api.response(400, 'Invalid input data or email already registered')
     def put(self, user_id):
         """Update user information"""
-        current_user = get_jwt_identity()
-        if current_user['id'] != user_id and not current_user['is_admin']:
-            return {'error': 'Access denied'}, 403
-        
+        current_user_id = get_jwt_identity()
         user_data = api.payload
         result = facade.update_user(user_id, user_data)
         if isinstance(result, dict) and 'error' in result:
