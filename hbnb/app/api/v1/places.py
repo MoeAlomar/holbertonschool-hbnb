@@ -1,4 +1,5 @@
 from flask_restx import Namespace, Resource, fields
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.services import facade
 
 api = Namespace('places', description='Place operations')
@@ -56,11 +57,14 @@ place_list_model = api.model('PlaceList', {
 
 @api.route('/')
 class PlaceList(Resource):
+    @jwt_required()
     @api.expect(place_input_model, validate=True)
     @api.response(201, 'Place successfully created')
     def post(self):
         """Register a new place"""
         place_data = api.payload
+        current_user_id = get_jwt_identity()
+        place_data['owner_id'] = current_user_id  # Set owner_id from JWT
         try:
             place = facade.create_place(place_data)
             return {
@@ -118,16 +122,21 @@ class PlaceResource(Resource):
             } for review in place.reviews]
         }
 
+    @jwt_required()
     @api.expect(place_input_model, validate=True)
     @api.response(200, 'Place updated successfully')
     @api.response(404, 'Place not found')
+    @api.response(403, 'Unauthorized action')
     def put(self, place_id):
         """Update a place's information"""
+        current_user_id = get_jwt_identity()
         place_data = api.payload
         try:
             place = facade.update_place(place_id, place_data)
             if not place:
                 api.abort(404, "Place not found")
+            if place.owner.id != current_user_id:
+                return {'error': 'Unauthorized action'}, 403
             return {
                 'id': place.id,
                 'title': place.title,
