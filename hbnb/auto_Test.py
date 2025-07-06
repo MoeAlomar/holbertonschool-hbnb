@@ -3,135 +3,148 @@ import jwt
 
 BASE_URL = "http://127.0.0.1:5000/api/v1"
 
-# Step 1: Register a user
-print("🔐 Registering user...")
-user_data = {
-    "first_name": "Test",
-    "last_name": "User",
-    "email": "testuser@example.com",
-    "password": "securepassword"
-}
-res = requests.post(f"{BASE_URL}/users/", json=user_data)
-if res.status_code == 400 and "already registered" in res.text:
-    print("User already exists. Continuing...")
-else:
+def register_user(first_name, last_name, email, password, ad=False):
+    print(f"\n🔐 Registering {email}...")
+    user_data = {
+        "first_name": first_name,
+        "last_name": last_name,
+        "email": email,
+        "password": password,
+        "is_admin": ad
+    }
+    res = requests.post(f"{BASE_URL}/users/", json=user_data)
+    if res.status_code == 400:
+        print("User already exists. Continuing...")
+    else:
+        res.raise_for_status()
+        print("User created:", res.json())
+    return res.json().get("id")
+
+def login(email, password):
+    print(f"\n🔑 Logging in as {email}...")
+    res = requests.post(f"{BASE_URL}/auth/login", json={
+        "email": email,
+        "password": password
+    })
     res.raise_for_status()
-    print("User created:", res.json())
+    token = res.json()["access_token"]
+    decoded = jwt.decode(token, options={"verify_signature": False})
+    print("Logged in. is_admin:", decoded.get("is_admin", False))
+    return token, decoded["sub"]
 
-user_id = res.json().get("id")
+def create_place(title, description, price, latitude, longitude, owner_id, headers):
+    print(f"\n🏠 Creating place: {title}...")
+    place_data = {
+        "title": title,
+        "description": description,
+        "price": price,
+        "latitude": latitude,
+        "longitude": longitude,
+        "owner_id": owner_id
+    }
+    res = requests.post(f"{BASE_URL}/places/", json=place_data, headers=headers)
+    if res.status_code == 201:
+        print("Place created:", res.json())
+        return res.json().get("id")
+    else:
+        print(f"Failed to create place. Status: {res.status_code}, Response: {res.json()}")
+        return None
 
-# Step 2: Log in and get token
-print("\n🔐 Logging in to get token...")
-login_data = {
-    "email": user_data["email"],
-    "password": user_data["password"]
-}
-res = requests.post(f"{BASE_URL}/auth/login", json=login_data)
-res.raise_for_status()
-token = res.json()["access_token"]
-print("Token:", token)
+# Register users
+admin_email = "admin@example.com"
+user1_email = "alice@example.com"
+user2_email = "bob@example.com"
 
-# Optional: Decode token to confirm structure (not required)
-decoded = jwt.decode(token, options={"verify_signature": False})
-print("Decoded Token:", decoded)
+admin_id = register_user("Admin", "User", admin_email, "adminpass", True)
+user1_id = register_user("Alice", "Smith", user1_email, "alicepass")
+user2_id = register_user("Bob", "Jones", user2_email, "bobpass")
 
-headers = {
-    "Authorization": f"Bearer {token}",
-    "Content-Type": "application/json"
-}
+# Log in
+admin_token, admin_id = login(admin_email, "adminpass")
+user1_token, user1_id = login(user1_email, "alicepass")
+user2_token, user2_id = login(user2_email, "bobpass")
 
-# Step 3: Create a place
-print("\n🏠 Creating a place...")
-place_data = {
-    "title": "Test Apartment",
-    "description": "A great test place",
-    "price": 120.0,
-    "latitude": 12.34,
-    "longitude": 56.78,
-    "owner_id": user_id,  # normally injected in backend, but needed here due to the input model
-    "amenities": []
-}
-res = requests.post(f"{BASE_URL}/places/", json=place_data, headers=headers)
-res.raise_for_status()
-place = res.json()
-print("Place created:", place)
-place_id = place["id"]
+admin_headers = {"Authorization": f"Bearer {admin_token}", "Content-Type": "application/json"}
+user1_headers = {"Authorization": f"Bearer {user1_token}", "Content-Type": "application/json"}
+user2_headers = {"Authorization": f"Bearer {user2_token}", "Content-Type": "application/json"}
 
-# Step 4: List places (public endpoint)
-print("\n🌍 Getting list of places (public)...")
-res = requests.get(f"{BASE_URL}/places/")
-res.raise_for_status()
-print("Places:", res.json())
+# Create places owned by different users
+user1_place_id = create_place("Alice's Cozy Apartment", "A lovely place in downtown", 100.0, 40.7128, -74.0060, user1_id, user1_headers)
+user2_place_id = create_place("Bob's Beach House", "Relaxing beachfront property", 200.0, 25.7617, -80.1918, user2_id, user2_headers)
 
-# Step 5: Create a review (user can't review own place → expect failure)
-print("\n💬 Trying to review own place (should fail)...")
-review_data = {
-    "text": "Awesome place!",
-    "rating": 5,
-    "user_id": user_id,
-    "place_id": place_id
-}
-res = requests.post(f"{BASE_URL}/reviews/", json=review_data, headers=headers)
-if res.status_code == 400:
-    print("✅ Expected failure:", res.json())
+if user1_place_id and user2_place_id:
+    # 🚫 User1 tries to update User2's place (should fail)
+    print("\n🚫 User1 tries to update User2's place (should fail)...")
+    res = requests.put(f"{BASE_URL}/places/{user2_place_id}", json={
+        "title": "Hacked Beach House",
+        "description": "This has been hacked!",
+        "price": 1.0,
+        "latitude": 25.7617,
+        "longitude": -80.1918,
+        "owner_id": user2_id
+    }, headers=user1_headers)
+    print("Status:", res.status_code, "Response:", res.json())
+
+    # ✅ User1 updates their own place
+    print("\n✅ User1 updates their own place...")
+    res = requests.put(f"{BASE_URL}/places/{user1_place_id}", json={
+        "title": "Alice's Updated Cozy Apartment",
+        "description": "An even lovelier place in downtown",
+        "price": 120.0,
+        "latitude": 40.7128,
+        "longitude": -74.0060,
+        "owner_id": user1_id
+    }, headers=user1_headers)
+    print("Status:", res.status_code, "Response:", res.json())
+
+    # 🛠️ Admin updates User2's place (should succeed)
+    print("\n🛠️ Admin updates User2's place...")
+    res = requests.put(f"{BASE_URL}/places/{user2_place_id}", json={
+        "title": "Bob's Premium Beach House",
+        "description": "Luxury beachfront property with admin approval",
+        "price": 350.0,
+        "latitude": 25.7617,
+        "longitude": -80.1918,
+        "owner_id": user2_id
+    }, headers=admin_headers)
+    print("Status:", res.status_code, "Response:", res.json())
+
+    # 🛠️ Admin updates User1's place (should succeed)
+    print("\n🛠️ Admin updates User1's place...")
+    res = requests.put(f"{BASE_URL}/places/{user1_place_id}", json={
+        "title": "Alice's Admin-Approved Apartment",
+        "description": "Verified and approved by admin",
+        "price": 150.0,
+        "latitude": 40.7128,
+        "longitude": -74.0060,
+        "owner_id": user1_id
+    }, headers=admin_headers)
+    print("Status:", res.status_code, "Response:", res.json())
+
+    # 🗑️ Admin deletes User1's place
+    print("\n🗑️ Admin deletes User1's place...")
+    res = requests.delete(f"{BASE_URL}/places/{user1_place_id}", headers=admin_headers)
+    print("Status:", res.status_code, "Response:", res.json())
+
+    # ❌ Try to get deleted place
+    print("\n❌ Trying to get deleted place...")
+    res = requests.get(f"{BASE_URL}/places/{user1_place_id}")
+    if res.status_code == 404:
+        print("✅ Place not found as expected (deleted).")
+    else:
+        print("⚠️ Unexpected response:", res.json())
+
+    # 🚫 User2 tries to delete their own place (should work for regular users)
+    print("\n✅ User2 deletes their own place...")
+    res = requests.delete(f"{BASE_URL}/places/{user2_place_id}", headers=user2_headers)
+    print("Status:", res.status_code, "Response:", res.json())
+
 else:
-    print("⚠️ Unexpected result:", res.status_code, res.text)
+    print("❌ Failed to create test places. Check your place creation endpoint.")
 
-# Step 6: Simulate a second user to review the place properly
-print("\n👥 Registering second user to review the place...")
-second_user = {
-    "first_name": "Reviewer",
-    "last_name": "Two",
-    "email": "reviewer2@example.com",
-    "password": "anotherpassword"
-}
-res = requests.post(f"{BASE_URL}/users/", json=second_user)
-if res.status_code == 400:
-    print("Second user already exists.")
-res = requests.post(f"{BASE_URL}/auth/login", json={
-    "email": second_user["email"],
-    "password": second_user["password"]
-})
-res.raise_for_status()
-second_token = res.json()["access_token"]
-second_headers = {
-    "Authorization": f"Bearer {second_token}",
-    "Content-Type": "application/json"
-}
+# 🛠️ Admin creates a place for User1 (bypassing ownership)
+print("\n🛠️ Admin creates a place for User1...")
+admin_created_place_id = create_place("Admin's Gift to Alice", "A place created by admin for Alice", 80.0, 41.8781, -87.6298, user1_id, admin_headers)
 
-# Step 7: Second user creates review
-print("\n💬 Second user creating review...")
-res = requests.post(f"{BASE_URL}/reviews/", json={
-    "text": "Lovely place!",
-    "rating": 4,
-    "user_id": jwt.decode(second_token, options={"verify_signature": False})["sub"],
-    "place_id": place_id
-}, headers=second_headers)
-res.raise_for_status()
-print("Review created:", res.json())
-review_id = res.json()["id"]
-
-# Step 8: Try updating the review as second user
-print("\n✏️ Updating review as second user...")
-res = requests.put(f"{BASE_URL}/reviews/{review_id}", json={
-    "text": "Actually, not bad",
-    "rating": 4,
-    "user_id": jwt.decode(second_token, options={"verify_signature": False})["sub"],
-    "place_id": place_id
-}, headers=second_headers)
-res.raise_for_status()
-print(res.json())
-
-# Step 9: Try deleting the review as second user
-print("\n🗑️ Deleting review as second user...")
-res = requests.delete(f"{BASE_URL}/reviews/{review_id}", headers=second_headers)
-res.raise_for_status()
-print(res.json())
-
-# Step 10: Try unauthorized access (no token)
-print("\n🚫 Trying protected endpoint without token...")
-res = requests.get(f"{BASE_URL}/users/{user_id}")
-if res.status_code == 401:
-    print("✅ Unauthorized access correctly blocked:", res.json())
-else:
-    print("⚠️ Unexpected behavior:", res.status_code, res.text)
+if admin_created_place_id:
+    print(f"✅ Admin successfully created place {admin_created_place_id} for User1")

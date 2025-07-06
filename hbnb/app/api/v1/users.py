@@ -1,5 +1,5 @@
 from flask_restx import Namespace, Resource, fields
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.services import facade
 
 api = Namespace('users', description='User operations')
@@ -56,8 +56,13 @@ class UserResource(Resource):
     def put(self, user_id):
         """Update user information"""
         current_user_id = get_jwt_identity()
+        jwt_data = get_jwt()
+        is_admin = jwt_data.get('is_admin', False)
         user_data = api.payload
+        if current_user_id != user_id and not is_admin:
+            return {'error': 'Access denied'}, 403
         result = facade.update_user(user_id, user_data)
+
         if isinstance(result, dict) and 'error' in result:
             return result, 400
         if not result:

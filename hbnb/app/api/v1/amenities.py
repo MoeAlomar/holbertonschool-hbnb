@@ -1,3 +1,4 @@
+from flask_jwt_extended import get_jwt_identity, get_jwt
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
 
@@ -52,6 +53,9 @@ class AmenityResource(Resource):
     def put(self, amenity_id):
         """Update an amenity's information"""
         # Placeholder for the logic to update an amenity by ID
+        current_user = get_jwt_identity()
+        if not current_user.get('is_admin', False):
+            return {'error': 'Admin privileges required'}, 403
         amenity_data = api.payload
         result = facade.update_amenity(amenity_id, amenity_data)
         if isinstance(result, dict) and 'error' in result:
