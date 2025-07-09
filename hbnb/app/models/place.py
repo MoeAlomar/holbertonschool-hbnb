@@ -1,7 +1,18 @@
 from .BaseModel import BaseModel
 from .user import User
 from .amenity import  Amenity
+from app.extensions import db, bcrypt
+
 class Place(BaseModel):
+    __tablename__ = 'places'
+
+    title = db.Column(db.String(128), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    price = db.Column(db.Float, nullable=False)
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
+    owner_id = db.Column(db.String(36), nullable=False)  # still just a string, not a relationship
+
     def __init__(self, title, description, price, latitude, longitude, owner):
         super().__init__()
         self.validate_Place(title, description, price, latitude, longitude, owner)
