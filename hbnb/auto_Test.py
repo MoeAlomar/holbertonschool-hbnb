@@ -73,78 +73,32 @@ user1_place_id = create_place("Alice's Cozy Apartment", "A lovely place in downt
 user2_place_id = create_place("Bob's Beach House", "Relaxing beachfront property", 200.0, 25.7617, -80.1918, user2_id, user2_headers)
 
 if user1_place_id and user2_place_id:
-    # 🚫 User1 tries to update User2's place (should fail)
-    print("\n🚫 User1 tries to update User2's place (should fail)...")
-    res = requests.put(f"{BASE_URL}/places/{user2_place_id}", json={
-        "title": "Hacked Beach House",
-        "description": "This has been hacked!",
-        "price": 1.0,
-        "latitude": 25.7617,
-        "longitude": -80.1918,
-        "owner_id": user2_id
+    # 🚫 User1 tries to update User2's profile (should fail)
+    print("\n🚫 User1 tries to update User2's profile (should fail)...")
+    res = requests.put(f"{BASE_URL}/users/{user2_id}", json={
+        "first_name": "Hacked",
+        "last_name": "User",
+        "email": "hacked@example.com",
+        "password": "newpass"
     }, headers=user1_headers)
     print("Status:", res.status_code, "Response:", res.json())
 
-    # ✅ User1 updates their own place
-    print("\n✅ User1 updates their own place...")
-    res = requests.put(f"{BASE_URL}/places/{user1_place_id}", json={
-        "title": "Alice's Updated Cozy Apartment",
-        "description": "An even lovelier place in downtown",
-        "price": 120.0,
-        "latitude": 40.7128,
-        "longitude": -74.0060,
-        "owner_id": user1_id
+    # ✅ User1 updates their own profile
+    print("\n✅ User1 updates their own profile...")
+    res = requests.put(f"{BASE_URL}/users/{user1_id}", json={
+        "first_name": "AliceUpdated",
+        "last_name": "SmithUpdated",
+        "email": "alice.updated@example.com",
+        "password": "alicepass"
     }, headers=user1_headers)
     print("Status:", res.status_code, "Response:", res.json())
 
-    # 🛠️ Admin updates User2's place (should succeed)
-    print("\n🛠️ Admin updates User2's place...")
-    res = requests.put(f"{BASE_URL}/places/{user2_place_id}", json={
-        "title": "Bob's Premium Beach House",
-        "description": "Luxury beachfront property with admin approval",
-        "price": 350.0,
-        "latitude": 25.7617,
-        "longitude": -80.1918,
-        "owner_id": user2_id
+    # 🛠️ Admin updates User2's profile
+    print("\n🛠️ Admin updates User2's profile...")
+    res = requests.put(f"{BASE_URL}/users/{user2_id}", json={
+        "first_name": "BobUpdated",
+        "last_name": "JonesUpdated",
+        "email": "bob.updated@example.com",
+        "password": "bobpass"
     }, headers=admin_headers)
     print("Status:", res.status_code, "Response:", res.json())
-
-    # 🛠️ Admin updates User1's place (should succeed)
-    print("\n🛠️ Admin updates User1's place...")
-    res = requests.put(f"{BASE_URL}/places/{user1_place_id}", json={
-        "title": "Alice's Admin-Approved Apartment",
-        "description": "Verified and approved by admin",
-        "price": 150.0,
-        "latitude": 40.7128,
-        "longitude": -74.0060,
-        "owner_id": user1_id
-    }, headers=admin_headers)
-    print("Status:", res.status_code, "Response:", res.json())
-
-    # 🗑️ Admin deletes User1's place
-    print("\n🗑️ Admin deletes User1's place...")
-    res = requests.delete(f"{BASE_URL}/places/{user1_place_id}", headers=admin_headers)
-    print("Status:", res.status_code, "Response:", res.json())
-
-    # ❌ Try to get deleted place
-    print("\n❌ Trying to get deleted place...")
-    res = requests.get(f"{BASE_URL}/places/{user1_place_id}")
-    if res.status_code == 404:
-        print("✅ Place not found as expected (deleted).")
-    else:
-        print("⚠️ Unexpected response:", res.json())
-
-    # 🚫 User2 tries to delete their own place (should work for regular users)
-    print("\n✅ User2 deletes their own place...")
-    res = requests.delete(f"{BASE_URL}/places/{user2_place_id}", headers=user2_headers)
-    print("Status:", res.status_code, "Response:", res.json())
-
-else:
-    print("❌ Failed to create test places. Check your place creation endpoint.")
-
-# 🛠️ Admin creates a place for User1 (bypassing ownership)
-print("\n🛠️ Admin creates a place for User1...")
-admin_created_place_id = create_place("Admin's Gift to Alice", "A place created by admin for Alice", 80.0, 41.8781, -87.6298, user1_id, admin_headers)
-
-if admin_created_place_id:
-    print(f"✅ Admin successfully created place {admin_created_place_id} for User1")
