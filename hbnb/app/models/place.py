@@ -2,6 +2,7 @@ from .BaseModel import BaseModel
 from .user import User
 from .amenity import  Amenity
 from app.extensions import db, bcrypt
+from app.models.place_amenity import place_amenity
 
 class Place(BaseModel):
     __tablename__ = 'places'
@@ -11,7 +12,13 @@ class Place(BaseModel):
     price = db.Column(db.Float, nullable=False)
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
-    owner_id = db.Column(db.String(36), nullable=False)  # still just a string, not a relationship
+
+    user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
+
+    # Relationships
+    reviews = db.relationship('Review', backref='place', lazy=True)
+    amenities = db.relationship('Amenity', secondary=place_amenity,
+                                backref=db.backref('places', lazy=True), lazy='subquery')
 
     def __init__(self, title, description, price, latitude, longitude, owner):
         super().__init__()
