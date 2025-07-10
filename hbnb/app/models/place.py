@@ -13,25 +13,12 @@ class Place(BaseModel):
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
 
-    user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
+    owner_id  = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
+    owner = db.relationship('User', backref='places', lazy=True)
 
     # Relationships
-    reviews = db.relationship('Review', backref='place', lazy=True)
     amenities = db.relationship('Amenity', secondary=place_amenity,
                                 backref=db.backref('places', lazy=True), lazy='subquery')
-
-    def __init__(self, title, description, price, latitude, longitude, owner):
-        super().__init__()
-        self.validate_Place(title, description, price, latitude, longitude, owner)
-
-        self.title = title
-        self.description = description
-        self.price = price
-        self.latitude = latitude
-        self.longitude = longitude
-        self.owner = owner
-        self.reviews = []  # List to store related reviews
-        self.amenities = []  # List to store related amenities
 
 
     def validate_Place(self, title, description, price, latitude, longitude, owner):

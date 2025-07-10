@@ -14,7 +14,7 @@ from app.services.repositories.user_repository import UserRepository
 class HBnBFacade:
     def __init__(self):
         self.user_repo = UserRepository()
-        self.place_repo = PlaceRepository
+        self.place_repo = PlaceRepository()
         self.review_repo = ReviewRepository()
         self.amenity_repo = AmenityRepository()
 
@@ -111,8 +111,9 @@ class HBnBFacade:
                 price=place_data['price'],
                 latitude=place_data['latitude'],
                 longitude=place_data['longitude'],
-                owner=owner
+                owner_id=owner.id  # ✅ CORRECT: use owner_id, not `owner`
             )
+
         except ValueError as e:
             raise ValueError(str(e))
 
@@ -177,7 +178,12 @@ class HBnBFacade:
         if not place:
             raise ValueError("Place not found")
 
-        review = Review(text=text, rating=rating, user=user, place=place)
+        review = Review(
+            text=text,
+            rating=rating,
+            user_id=user.id,
+            place_id=place.id
+        )
         self.review_repo.add(review)
         place.reviews.append(review)
         self.place_repo.update_obj(place)

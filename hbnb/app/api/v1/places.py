@@ -179,3 +179,38 @@ class PlaceReviewList(Resource):
             'rating': review.rating,
             'user_id': review.user.id
         } for review in reviews], 200
+
+
+
+@api.route('/<place_id>/amenities')
+class PlaceAmenityLink(Resource):
+    @jwt_required()
+    @api.doc(description='Link an existing amenity to a place')
+    @api.expect(api.model('AmenityLinkInput', {
+        'amenity_id': fields.String(required=True, description='ID of the amenity to link')
+    }), validate=True)
+    def post(self, place_id):
+        """Link an amenity to a place"""
+        current_user_id = get_jwt_identity()
+        jwt_data = get_jwt()
+        is_admin = jwt_data.get('is_admin', False)
+
+        place = facade.get_place(place_id)
+        if not place:
+            return {'error': 'Place not found'}, 404
+
+        if not is_admin and place.owner.id != current_user_id:
+            return {'error': 'Unauthorized'}, 403
+
+        amenity_id = api.payload.get('amenity_id')
+        amenity = facade.get_amenity(amenity_id)
+        if not amenity:
+            return {'error': 'Amenity not found'}, 404
+
+        try:
+            place.add_amenity(amenity)
+            from app.extensions import db
+            db.session.commit()
+            return {'message': 'Amenity linked to place'}, 200
+        except Exception as e:
+            return {'error': str(e)}, 400

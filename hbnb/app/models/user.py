@@ -13,20 +13,8 @@ class User(BaseModel):
     is_admin = db.Column(db.Boolean, default=False)
 
     # Relationships
-    places = db.relationship('Place', backref='owner', lazy=True)
-    reviews = db.relationship('Review', backref='author', lazy=True)
 
 
-    def __init__(self, first_name, last_name, email, password, is_admin=False):
-        super().__init__()
-
-        self.validate_User(first_name, last_name, email) # validate password later
-
-        self.first_name = first_name
-        self.last_name = last_name
-        self.email = email
-        self.password = password  # Should be hashed in a real app
-        self.is_admin = bool(is_admin)
 
     def hash_password(self, password):
         """Hashes the password before storing it."""

@@ -12,15 +12,9 @@ class Review(BaseModel):
     #Relationship
     user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
     place_id = db.Column(db.String(36), db.ForeignKey('places.id'), nullable=False)
-    def __init__(self, text, rating, place, user):
-        super().__init__()
 
-        self.validate_Review(text, rating, place, user)
-
-        self.text = text
-        self.rating = rating
-        self.place = place
-        self.user = user
+    user = db.relationship('User', backref='reviews')
+    place = db.relationship('Place', backref='reviews')
 
     def validate_Review(self, text, rating, place, user):
         if not text or not rating or not place or not user: # case of an empty field.
